@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- xlsx.js (C) 2013-present  SheetJS http://sheetjs.com -->
+<!-- vim: set ts=2: -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+  .links line {
+    stroke: #999;
+    stroke-opacity: 0.6;
+  }
+  
+  .nodes circle {
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
+  #content{
+    display: flex;
+    flex-direction: row;
+  } 
+</style>
+<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.0.min.js"></script>
+<script src="shim.js" type="text/javascript"></script>
+<script src="jszip.js" type="text/javascript"></script>
+<script src="xlsx.js" type="text/javascript"></script>    
+<script src="bundle.js" type="text/javascript" charset="UTF-8"></script>  
+    
+<title>SheetJS Live Demo</title>
+</head>
+<body>
+<pre>
+<input type="file" name="xlfile" id="xlf" /> Click here to select a file
+</pre>
+<div id="content">
+    <svg width="1000" height="450"></svg>
+    <div>  
+        <form name="myForm">
+            <p>
+                <input type="radio" id="n_alunos" name ="filter"/># of Students <br>
+                <input type="radio" id = "ranking" name ="filter"/> Ranking <br>
+                <input type="radio" id = "international"name ="filter"/># of International Students <br>
+                <input type="radio" id = "female" name ="filter"/># of Female Students <br>
+            </p>            
+        </form>
+        <p>
+                <input onclick="filter()" type="button" id="btnSubmit" value="Load" />               
+            </p>
+
+    </div>
+    </div>
+
+<!--
+<h1>Teste:</h1>
+<div id="teste"></div>
+-->
+<br />
+ 
+
+</body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="visualization.js" type="text/javascript"></script>
