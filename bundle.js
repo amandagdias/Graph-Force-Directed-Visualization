@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 const PCA = require('ml-pca');
-var cov = require( 'compute-covariance' );
+var cov = require( 'compute-covariance');
 var math = require('mathjs')
 
 var X = XLSX;
@@ -12,48 +12,52 @@ var XW = {
 };
 
 var global_wb;
+
+ var countries = [];  
+ var ranking = [];
+ var universities = [];
+ var biggest = [];
+//Matriz de distância que representam a grossura do link (quanto mais grosso, mais distância geograficamente os países são)
+ var distances = [[0, 6830, 8011, 2262, 15290, 7667, 7861, 15184, 7554, 11647, 10150, 12699, 7506, 7666, 7823, 7488, 10743],
+    [0,0, 1249, 5807, 10961, 1404, 1033, 15206, 757, 7780, 9200, 9557, 677, 1091, 1819, 813, 8858],
+    [0,0,0, 7056, 10323, 1628, 510, 14695, 494, 7596, 9526, 9339, 628, 465, 2013, 1054, 9020],
+    [0,0,0,0, 13068, 6214, 6751, 14152, 6563, 9386, 8083, 10490, 6454, 6841, 6246, 6255, 8579],
+    [0,0,0,0,0, 9610, 10125, 4377, 10550, 3837, 5250, 2591, 10469, 10787, 9254, 10149, 4567],
+    [0,0,0,0,0,0, 1119, 13806, 1390, 6379, 7975, 8156, 1210, 1883, 431, 686, 7549],
+    [0,0,0,0,0,0,0, 14466, 426, 7224, 9048, 8984, 372, 816, 1512, 570, 8570],
+    [0,0,0,0,0,0,0,0, 14892, 7474, 6852, 5709, 14793, 15159, 13405, 14415, 6832],
+    [0,0,0,0,0,0,0,0,0, 7627, 9365, 9393, 190, 504, 1813, 722, 8921],
+    [0,0,0,0,0,0,0,0,0,0, 3047, 1778, 7486, 8022, 5961, 7031, 2118],
+    [0,0,0,0,0,0,0,0,0,0,0, 2787, 9185, 9850, 7553, 8655, 943],
+    [0,0,0,0,0,0,0,0,0,0,0,0, 9256, 9774, 7739, 8807, 2000],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0, 693, 1636, 535, 8750],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0, 2298, 1224, 9384],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 1116, 7118],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 8235]];
+var max, min;
 $(document).ready(function(){        
         var xlf = $("#xlf");       
         $("#xlf").on('change',function(e) {
             console.log("listener "  + e);
             do_file(e.target.files);           
-        });
-    var x = document.getElementById("n_alunos");
-    x.checked = true;
-});
-//Para pegar uma coluna da matriz (para calcular a covariancia)
-function getCol(matrix, col){
-           var column = [];
-           for(var i=0; i<matrix.length; i++){
-              column.push(matrix[i][col]);
-           }
-           return column;
-}
-//Calcula a matriz transposta
-function transpose(a)
-{
-  return a[0].map(function (_, c) { return a.map(function (r) { return r[c]; }); });  
-}
-//Faz a multiplicação entre duas matrizes
-function multiply(a, b) {
-  var aNumRows = a.length, aNumCols = a[0].length,
-      bNumRows = b.length, bNumCols = b[0].length,
-      m = new Array(aNumRows);  // initialize array of rows
-  for (var r = 0; r < aNumRows; ++r) {
-    m[r] = new Array(bNumCols); // initialize the current row
-    for (var c = 0; c < bNumCols; ++c) {
-      m[r][c] = 0;             // initialize the current cell
-      for (var i = 0; i < aNumCols; ++i) {
-        m[r][c] += a[r][i] * b[i][c];
-      }
+        });  
+   
+    max = 0;
+    min = 1000000;
+    for (var i = 0; i < 16; i++){
+        for (var j = 0; j < distances[i].length; j++){            
+            if ((distances[i][j] > max)&&(distances[i][j]!=0)){
+                max = distances[i][j];
+            }
+            if ((distances[i][j] < min)&&(distances[i][j]!=0)){
+                min = distances[i][j];
+            }
+        }
     }
-  }
-  return m;
-}
+});
 //Função chamada após a escolha do arquivo
  var process_wb = (function() {
-//	var OUT = $("#out");
-//	var HTMLOUT = $("#htmlout");
+
     //Pega os valores maximos e minimos de um vetor
     Array.prototype.max = function() {
       return Math.max.apply(null, this);
@@ -73,12 +77,9 @@ function multiply(a, b) {
         var j2;
         var c = 0;
         var faltantes = false;
-        var countries = [];  
-        var ranking = [];
-        var universities = [];
+       
         k = i+1;
-        //Roda enquanto tiver linhas 
-//         while (csv.split('\n')[k])
+        //Pega as primeiras 100 universidades
         while (k <= 101)
          {                
                dataCSV[i] = [];
@@ -93,30 +94,28 @@ function multiply(a, b) {
                    //Pula as duas primeiras colunas pois são nomes de países e universidades e a coluna 8 pois tem muitos dados faltantes
                    if ((j > 2)&&(j!=8)){                    
                        if ((line.split(',')[j] == "")||(line.split(',')[j] == "-")){
-                           //dados faltantes, pular linha
+                           //dados faltantes, neste caso utilizarei o -1 como valor que representa dados faltantes
                            dataCSV[i][j2] = -1.0; 
                            j2++;
-//                           faltantes = true; 
-//                           c--;
-//                           break;
                        }                        
                        else{
                            dataCSV[i][j2] = parseFloat(line.split(',')[j]);                             
                            j2++;
                        }                            
                    }else if (j===2){                       
-                       countries[c] = line.split(',')[j];   
-                       ranking[c] = +line.split(',')[0]; 
-//                       if (+line.split(',')[0] <= 10)
-//                       {
-//                           ranking[c] = "#00BFFF";
-//                       }
-//                       else if ((+line.split(',')[0] > 10)&&(+line.split(',')[0] <= 100)){
-//                           ranking[c] = "#FF8C00";
-//                       }
-//                       else{
-//                           ranking[c] = "#FF0000";
-//                       }
+                       countries[c] = line.split(',')[j];
+                       
+                       if (+line.split(',')[0]){
+                          //Salvo o ranking de cada universidade e os maiores rankings são salvos para posteriormente serem os hubs do grafo
+                          ranking[c] = +line.split(',')[0]; 
+                          if (biggest[countries[c]] == null){
+                              console.log(countries[c] + " " + c);
+                              biggest[countries[c]] = c;
+                          }
+                       }
+                       else{
+                          ranking[c] = -1; 
+                       }
                        universities[c] = line.split(',')[1] 
                        c++;
                    }                                 
@@ -128,8 +127,10 @@ function multiply(a, b) {
                }else{
                    faltantes = false;                                     
                }                
-           }      
+           }    
+     
         lines = i;     
+//Começo a criar o arquivo JSON que será lido pelo D3
         var nodes = '{ "nodes": [ ';
         
         for (i=0; i < lines; i++){
@@ -155,40 +156,41 @@ function multiply(a, b) {
             }
         }    
         nodes+='],';
-//        console.log(nodes);
         var uniA;
         var uniB;
         var links = '"links": [ ';
-        for (i = 0 ; i < (lines-1); i++){
-            uniA = countries[i];
-            for (j=(i+1); j < lines; j++){
-                uniB = countries[j];
-                //Se as universidades forem do mesmo país, eu linko com força 1
-                if (uniA == uniB){
-                    links +=' {"source": "' + i + '", "target" : "' + j + '", "value":'+1+'}';
-//                    if ((i + 1) < (lines-1))
+        for (var k in biggest) {  
+            uniA = k;
+            for (j=0; j < lines; j++){
+                uniB = countries[j];                
+                //Se as universidades forem do mesmo país, eu linko com grossura do link = 2
+                if ((uniA == uniB)&&(universities[j] != universities[biggest[k]])){
+                    links +=' {"source": "' + biggest[k] + '", "target" : "' + j + '", "value":'+2+'}';
                     links+=',';    
                 }
                 
-//                }else{
-//                   links +=' {"source": "' + i + '", "target" : "' + j + '", "value":'+10+'}'
-//                    if ((i + 1) < (lines-1))
-//                        links+=','; 
-//                }
-                
+            }
+        }     
+//Seleciono os ids das universidades com maiores rankings e crio links entre elas
+        var biggest_id = [];
+        i = 0;
+        for (var k in biggest) {   
+            if (biggest.hasOwnProperty(k)){
+              biggest_id[i] = biggest[k];         
+              i++;
             }
         }
-//        links = links.slice(0, -1);
-        var biggest = [18,72,45,34,41,28,13,25,61,81,84,42,80,76,58,30,53];
-        for (i= 0; i < (biggest.length - 1); i++){
-            for (j=(i+1); j < biggest.length; j++){
-                links+= ' {"source": "' + biggest[i] + '", "target" : "' + biggest[j] + '", "value":'+2+'},';
+        for (i= 0; i < (biggest_id.length - 1); i++){
+            for (j=(i+1); j < biggest_id.length; j++){
+                links+= ' {"source": "' + biggest_id[i] + '", "target" : "' + biggest_id[j] + '", "value":'+CalcGrossuraLink(i,j)+'},';
             }
         }      
         links = links.slice(0,-1);
         links += '] }';
         
+//Concluindo o arquivo JSON e enviando para o arquivo visualization.js 
         var obj = JSON.parse(nodes+" " +links);
+       
         sendingJSON(obj);
       
 	};
@@ -198,6 +200,13 @@ function multiply(a, b) {
         to_csv(wb);
 	};
 })();
+function CalcGrossuraLink(a, b){    
+    var value = ((distances[a][b] - min) / (max - min)) * 15 + 1;
+    console.log(a+" " + b + " " + Math.round(value));
+    return Math.round(value);
+    
+}
+//Função que lê o arquivo selecionado
 var do_file = (function() {
     
 	var rABS = typeof FileReader !== "undefined" && (FileReader.prototype||{}).readAsBinaryString;

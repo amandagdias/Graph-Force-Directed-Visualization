@@ -7,15 +7,14 @@ var jsonFile;
   var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) {
       return d.index;
-    }))
+    }).distance(80))
     .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("center", d3.forceCenter(width / 2, height / 2))
+
 var node;
   function JSONReady(){
-//        d3.json(jsonFile, function(error, graph) {
-        var graph = jsonFile;
-//        if (error) throw error;
-        console.log(graph.links);
+//Recebe o arquivo JSON da main.js
+        var graph = jsonFile;        
         var link = svg.append("g")
           .attr("class", "links")
           .selectAll("line")
@@ -24,7 +23,7 @@ var node;
           .attr("stroke-width", function(d) {
             return Math.sqrt(d.value);
           });
-
+//Cria os nós que são representados pelas bandeiras de cada país
         node = svg.append("g")
           .attr("class", "nodes")
           .selectAll("image")
@@ -35,22 +34,17 @@ var node;
                 })
           .attr("x", -8)
           .attr("y", -8)
-          
-//          .attr("width", function(d){
-//              
-//              return 20})
-//          .attr("height", function(d){
-//              return 20})
           .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
         
-
+//Adiciono um título ao nó e o texto será substituido pelo nome da universidade e o filtro selecionado
         node.append("title")
           .text(function(d) {
-            return d.id +" " +  d.female_students;
+            return d.id +" " +  d.rank;
           });
+//Chamo a função que irá aplicar o filtro selecionado
         filter();
         simulation
           .nodes(graph.nodes)
@@ -81,10 +75,10 @@ var node;
             })
 
         }
-//      });
   }
   
   function filter(){    
+//Verifico qual é o filtro seleciono e altero o tamanho e o título
       if (node){
           if (document.getElementById('n_alunos').checked){
              node
@@ -180,8 +174,7 @@ var node;
     d.fx = null;
     d.fy = null;
   }
-  function sendingJSON(json){
-      console.log("From visualization js");
+  function sendingJSON(json){     
       jsonFile = json;
       JSONReady();
       
