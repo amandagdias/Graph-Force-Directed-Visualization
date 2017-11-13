@@ -18,6 +18,9 @@
     display: flex;
     flex-direction: row;
   } 
+  .fonte{
+        font: 15px courier new, sans-serif;
+    }
 </style>
 <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.0.min.js"></script>
 <script src="shim.js" type="text/javascript"></script>
@@ -25,17 +28,17 @@
 <script src="xlsx.js" type="text/javascript"></script>    
 <script src="bundle.js" type="text/javascript" charset="UTF-8"></script>  
     
-<title>SheetJS Live Demo</title>
+<title>Times World University Rankings</title>
 </head>
 <body>
 <pre>
-<input type="file" name="xlfile" id="xlf" /> Click here to select a file
+<input type="file" name="xlfile" id="xlf" class = "fonte" /> Click here to select a file
 </pre>
 <div id="content">
-    <svg width="1000" height="450"></svg>
+    <svg width="1000" height="550"></svg>
     <div>  
         <form name="myForm">
-            <p>
+            <p class = "fonte" >
                 <input type="radio" id="n_alunos" name ="filter"/># of Students <br>
                 <input type="radio" id = "ranking" name ="filter"/> Ranking <br>
                 <input type="radio" id = "international"name ="filter"/># of International Students <br>
@@ -43,7 +46,7 @@
             </p>            
         </form>
         <p>
-                <input onclick="filter()" type="button" id="btnSubmit" value="Load" />               
+                <input onclick="filter()" type="button" id="btnSubmit" value="Load" class = "fonte" />               
             </p>
 
     </div>
